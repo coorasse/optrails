@@ -4,7 +4,7 @@
      Do not edit by hand: re-run `ruby bench/aggregate.rb`. -->
 
 1 run(s) across 1 platform(s): heroku.
-Last rendered 2026-07-12T21:45:05Z.
+Last rendered 2026-07-12T21:47:45Z.
 
 
 ## How to read this
@@ -34,15 +34,15 @@ No load runs recorded yet — every run so far is topology-only (`--no-load`). I
 
 ## Runs
 
-### heroku / Basic — 2026-07-12T21:45:05Z
+### heroku / Basic — 2026-07-12T21:47:45Z
 
 - **URL**: https://optrails-heroku-189a76ca2865.herokuapp.com
-- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 144.4 MB RSS/worker
+- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 94.6 MB RSS/worker
 - **Stack**: Ruby 3.4.10, Rails 8.1.3
 - **DB host**: `cfqhejne93eh4i.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com`
 - **Database**: essential-0 (~$5.00/mo)
-- **WORKER_RSS_MB**: unset
-- **Commit**: `79333c0`
+- **WORKER_RSS_MB**: 300 (placeholder — not measured)
+- **Commit**: `2209790`
 - **Load**: none — topology only
 - **Note**: Smoke-test tier. 512 MB gives exactly 1 Puma worker, so this is NOT comparable to the Fly 1GB / Render 2GB tiers.
-- **Note**: WORKER_RSS_MB is still the 300 MB placeholder; measured RSS is ~106 MB idle. Measure under load before a real run.
+- **Note**: WORKER_RSS_MB is the 300 MB placeholder while a worker actually uses ~94 MB idle. Measure under load and set it identically on all platforms before a real run.
