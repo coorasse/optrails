@@ -1,0 +1,33 @@
+# Fly.io. Deploy: `fly launch --no-deploy` then edit, or `fly deploy`.
+# Provision a co-located DB in the SAME region for a fair db_latency number:
+#   fly postgres create --region fra   # match primary_region below
+#   fly postgres attach <pg-app-name>
+app = "optrails-fly"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  RAILS_ENV = "production"
+  # Autotune reads real cgroup limits; leave WEB_CONCURRENCY unset to let it size.
+  THREADS_PER_WORKER = "5"
+  WORKER_RSS_MB = "300"       # replace with measured value (see README)
+  SEED_ROWS = "100000"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false  # keep 1 instance pinned; we are not benchmarking autoscale
+  auto_start_machines = false
+  min_machines_running = 1
+
+# Persistent volume for the disk (fio) test on local NVMe.
+[mounts]
+  source = "optrails_data"
+  destination = "/data"
+
+# Pick ONE size per run and record it. Example: shared 1x / 1GB.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

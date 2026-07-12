@@ -1,0 +1,20 @@
+{
+  "_note": "Monthly USD list prices, verify before publishing (see README sources). RAM in GB. vCPU is the platform's advertised share, which is exactly what this benchmark exists to sanity-check against real throughput. Fly is pay-as-you-go; monthly = ~730h always-on.",
+  "tiers": [
+    { "platform": "heroku", "tier": "Basic",        "ram_gb": 0.5, "vcpu": "shared",  "usd_month": 7 },
+    { "platform": "heroku", "tier": "Standard-1X",  "ram_gb": 0.5, "vcpu": "1x",      "usd_month": 25 },
+    { "platform": "heroku", "tier": "Standard-2X",  "ram_gb": 1.0, "vcpu": "2x",      "usd_month": 50 },
+    { "platform": "heroku", "tier": "Performance-M","ram_gb": 2.5, "vcpu": "dedicated","usd_month": 250 },
+    { "platform": "heroku", "tier": "Performance-L","ram_gb": 14.0,"vcpu": "dedicated","usd_month": 500 },
+
+    { "platform": "render", "tier": "Starter",      "ram_gb": 0.5, "vcpu": "0.5",     "usd_month": 7 },
+    { "platform": "render", "tier": "Standard",     "ram_gb": 2.0, "vcpu": "1",       "usd_month": 25 },
+    { "platform": "render", "tier": "Pro",          "ram_gb": 4.0, "vcpu": "2",       "usd_month": 85 },
+    { "platform": "render", "tier": "Pro Plus",     "ram_gb": 8.0, "vcpu": "4",       "usd_month": 175 },
+
+    { "platform": "fly",    "tier": "shared-1x-1gb", "ram_gb": 1.0, "vcpu": "1 shared","usd_month": 5.70 },
+    { "platform": "fly",    "tier": "shared-1x-2gb", "ram_gb": 2.0, "vcpu": "1 shared","usd_month": 10.70 },
+    { "platform": "fly",    "tier": "shared-4x-8gb", "ram_gb": 8.0, "vcpu": "4 shared","usd_month": 42.79 },
+    { "platform": "fly",    "tier": "performance-1x","ram_gb": 2.0, "vcpu": "1 dedicated","usd_month": 31.00 }
+  ]
+}

@@ -1,0 +1,34 @@
+# Render Blueprint. Deploy: push repo, New > Blueprint, point at this file.
+# Co-located managed Postgres in the same region for a fair db_latency number.
+services:
+  - type: web
+    name: optrails-render
+    runtime: docker
+    region: frankfurt
+    plan: standard          # pick ONE tier per run; record it (2GB / 1 vCPU)
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: false
+    numInstances: 1         # not benchmarking autoscale
+    disk:
+      name: optrails-data
+      mountPath: /data
+      sizeGB: 10
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: THREADS_PER_WORKER
+        value: "5"
+      - key: WORKER_RSS_MB
+        value: "300"
+      - key: SEED_ROWS
+        value: "100000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: optrails-db
+          property: connectionString
+
+databases:
+  - name: optrails-db
+    region: frankfurt
+    plan: basic-256mb       # match to the compute tier you are testing

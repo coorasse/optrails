@@ -1,0 +1,17 @@
+{
+  "name": "optrails-heroku",
+  "description": "OptRails PaaS benchmark - Heroku target. NOTE: dynos have only an ephemeral filesystem; run the fio test against /tmp and label it ephemeral.",
+  "stack": "container",
+  "formation": {
+    "web": { "quantity": 1, "size": "standard-2x" }
+  },
+  "addons": [
+    { "plan": "heroku-postgresql:standard-0" }
+  ],
+  "env": {
+    "RAILS_ENV": { "value": "production" },
+    "THREADS_PER_WORKER": { "value": "5" },
+    "WORKER_RSS_MB": { "value": "300" },
+    "SEED_ROWS": { "value": "100000" }
+  }
+}

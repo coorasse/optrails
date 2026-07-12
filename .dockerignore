@@ -1,0 +1,6 @@
+.git
+tmp
+log
+bench/results/*.json
+bench/results/*.png
+*.md

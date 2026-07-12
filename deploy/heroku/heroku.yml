@@ -1,0 +1,10 @@
+# Heroku container deploy. `heroku stack:set container` then `git push heroku main`.
+build:
+  docker:
+    web: Dockerfile
+release:
+  command:
+    - bundle exec rails db:prepare && bundle exec rails runner 'load Rails.root.join("db/seeds.rb")'
+  image: web
+run:
+  web: bundle exec puma -C config/puma.rb

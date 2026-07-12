@@ -1,0 +1,15 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # Pool must be >= Puma threads or we measure our own contention.
+  pool: <%= [ (ENV["RAILS_MAX_THREADS"] || 5).to_i, (ENV["DB_POOL"] || 5).to_i ].max %>
+  # Short checkout timeout so pool starvation shows up as an error, not a hang.
+  checkout_timeout: <%= ENV.fetch("DB_CHECKOUT_TIMEOUT", "5") %>
+
+development:
+  <<: *default
+  url: <%= ENV.fetch("DATABASE_URL", "postgres://localhost/optrails_dev") %>
+
+production:
+  <<: *default
+  url: <%= ENV["DATABASE_URL"] %>

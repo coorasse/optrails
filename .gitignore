@@ -1,0 +1,11 @@
+/tmp
+/log
+*.log
+Gemfile.lock
+bench/results/*.json
+bench/results/*.png
+raw.json
+summary.json
+__pycache__/
+*.pyc
+.env

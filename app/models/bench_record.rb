@@ -1,0 +1,2 @@
+class BenchRecord < ApplicationRecord
+end
