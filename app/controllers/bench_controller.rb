@@ -19,6 +19,9 @@ class BenchController < ApplicationController
       threads: ENV["AUTOTUNE_THREADS"],
       total_mem_mb: ENV["AUTOTUNE_TOTAL_MEM_MB"],
       cpu_count: ENV["AUTOTUNE_CPU_COUNT"],
+      # The estimate the plan was derived from, vs what this worker actually uses.
+      worker_rss_mb_setting: ENV["AUTOTUNE_WORKER_RSS_MB"],
+      target_fraction: ENV["AUTOTUNE_TARGET_FRACTION"],
       worker_rss_mb: current_rss_mb,
       ruby: RUBY_VERSION,
       rails: Rails.version,

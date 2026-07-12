@@ -1,0 +1,38 @@
+{
+  "platform": "heroku",
+  "tier": "Basic",
+  "url": "https://optrails-heroku-189a76ca2865.herokuapp.com",
+  "collected_at": "2026-07-12T21:45:05Z",
+  "git_sha": "79333c0",
+  "slo_ms": 200,
+  "price": {
+    "platform": "heroku",
+    "tier": "Basic",
+    "ram_gb": 0.5,
+    "vcpu": "shared",
+    "usd_month": 7,
+    "usd_month_total": 12.0
+  },
+  "db": {
+    "plan": "essential-0",
+    "usd_month": 5.0
+  },
+  "info": {
+    "workers": "1",
+    "threads": "5",
+    "total_mem_mb": "512",
+    "cpu_count": "8",
+    "worker_rss_mb": 144.4,
+    "ruby": "3.4.10",
+    "rails": "8.1.3",
+    "region": null,
+    "db_host": "cfqhejne93eh4i.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com",
+    "pid": 7
+  },
+  "env": {},
+  "scenarios": {},
+  "notes": [
+    "Smoke-test tier. 512 MB gives exactly 1 Puma worker, so this is NOT comparable to the Fly 1GB / Render 2GB tiers.",
+    "WORKER_RSS_MB is still the 300 MB placeholder; measured RSS is ~106 MB idle. Measure under load before a real run."
+  ]
+}

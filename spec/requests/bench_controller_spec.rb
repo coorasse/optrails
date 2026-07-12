@@ -18,7 +18,8 @@ RSpec.describe BenchController do
 
       expect(response).to have_http_status(:ok)
       expect(json).to include("workers", "threads", "total_mem_mb", "cpu_count",
-                              "worker_rss_mb", "region", "db_host")
+                              "worker_rss_mb", "worker_rss_mb_setting", "target_fraction",
+                              "region", "db_host")
       expect(json["ruby"]).to eq(RUBY_VERSION)
       expect(json["rails"]).to eq(Rails.version)
       expect(json["pid"]).to eq(Process.pid)

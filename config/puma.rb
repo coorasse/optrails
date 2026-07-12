@@ -17,8 +17,12 @@ on_worker_boot do
   ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
 end
 
-# Expose the chosen plan so /bench/info can report what actually ran.
+# Expose the chosen plan so /bench/info can report what actually ran. The two
+# inputs (RSS estimate, target fraction) matter as much as the outputs: the
+# worker count is only as honest as the RSS figure it was derived from.
 ENV["AUTOTUNE_WORKERS"] = plan[:workers].to_s
 ENV["AUTOTUNE_THREADS"] = plan[:threads].to_s
 ENV["AUTOTUNE_TOTAL_MEM_MB"] = plan[:total_mem_mb].to_s
 ENV["AUTOTUNE_CPU_COUNT"] = plan[:cpu_count].to_s
+ENV["AUTOTUNE_WORKER_RSS_MB"] = plan[:worker_rss_mb].to_s
+ENV["AUTOTUNE_TARGET_FRACTION"] = plan[:target_fraction].to_s
