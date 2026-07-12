@@ -13,12 +13,8 @@ module OptRails
     config.api_only = true
     config.eager_load = ENV.fetch("RAILS_ENV", "development") == "production"
 
-    # Keep the DB pool at least as large as the Puma thread count so
-    # pool-checkout latency reflects the platform, not our own starvation.
-    config.after_initialize do
-      pool = (ENV["RAILS_MAX_THREADS"] || 5).to_i
-      db = ActiveRecord::Base.connection_db_config.configuration_hash.dup
-      db[:pool] = [pool, db[:pool].to_i].max
-    end
+    # The DB pool must stay >= the Puma thread count so pool-checkout latency
+    # reflects the platform, not our own starvation. That is enforced where the
+    # pool is actually built, in config/database.yml.
   end
 end

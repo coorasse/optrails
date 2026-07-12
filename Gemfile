@@ -6,3 +6,7 @@ gem "rails", "~> 8.0"
 gem "pg", "~> 1.5"
 gem "puma", "~> 6.4"
 gem "bootsnap", require: false
+
+group :development, :test do
+  gem "rspec-rails"
+end
