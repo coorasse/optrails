@@ -11,6 +11,7 @@
 require "json"
 require "time"
 require "fileutils"
+require "uri"
 
 module Aggregate
   module_function
@@ -98,9 +99,9 @@ module Aggregate
       rows.sort_by! { |_r, s| -(s["rps_per_usd"] || 0) }
 
       out << "\n### `#{scenario}` — SLO p95 < #{rows.first[0]['slo_ms']} ms\n\n"
-      out << "| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | " \
-             "sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |\n"
-      out << "|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|\n"
+      out << "| platform | instance | tier | database | RAM | $/mo | +db $/mo | " \
+             "workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |\n"
+      out << "|---|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|\n"
       rows.each { |r, s| out << scenario_row(r, s) }
     end
     out
@@ -118,16 +119,25 @@ module Aggregate
     sustained = held ? num(s["rps"], 1) : "0"
     sustained += " (>=)" if s["knee_not_found"]
 
-    # Two runs of the same tier can differ only by their database plan, so it has
-    # to be in the table or the rows are indistinguishable.
+    # Two runs of the same tier can differ only by their database plan or by
+    # being separate instances, so both have to be in the table or the rows are
+    # indistinguishable. Two instances of the same tier disagreeing IS a result:
+    # it is the reproducibility of the whole experiment.
     db = rec.dig("db", "plan") || "—"
 
-    format("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n",
-           rec["platform"], rec["tier"], db, ram,
+    format("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n",
+           rec["platform"], instance(rec), rec["tier"], db, ram,
            usd(price["usd_month"]), usd(price["usd_month_total"]), plan,
            sustained, num(s["p95_ms"], 1),
            held ? "yes" : "**no**",
            num(s["rps_per_usd"], 2), num(s["rps_per_usd_total"], 2))
+  end
+
+  def instance(rec)
+    host = URI(rec["url"].to_s).host.to_s
+    host.split(".").first.to_s.sub(/-[0-9a-f]{10,}\z/, "") # drop heroku's random suffix
+  rescue StandardError
+    "—"
   end
 
   def usd(value)

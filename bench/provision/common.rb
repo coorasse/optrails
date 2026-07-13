@@ -44,6 +44,8 @@ module Provision
 
   def secret_key_base = SecureRandom.hex(64)
 
+  def strip_ansi(text) = text.gsub(/\e\[[0-9;]*m/, "")
+
   def step(message)
     warn "\n==> #{message}"
   end

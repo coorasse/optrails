@@ -112,9 +112,11 @@ module HerokuTarget
     Provision.run!("heroku", "ps:type", "web=#{opts[:dyno]}", "--app", opts[:app], quiet: true)
   end
 
+  # The Heroku CLI colourises even --json, so the payload has to be de-ANSI'd
+  # before it will parse.
   def app_host(app)
     info = Provision.run!("heroku", "apps:info", "--app", app, "--json", quiet: true)
-    URI(JSON.parse(info).dig("app", "web_url")).host
+    URI(JSON.parse(Provision.strip_ansi(info)).dig("app", "web_url")).host
   end
 
   def destroy!(app)
