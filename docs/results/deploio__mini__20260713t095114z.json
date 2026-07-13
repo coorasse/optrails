@@ -1,0 +1,398 @@
+{
+  "platform": "deploio",
+  "tier": "mini",
+  "url": "https://master.f1bb408.deploio.app",
+  "collected_at": "2026-07-13T09:51:14Z",
+  "git_sha": "0f70507",
+  "slo_ms": 200,
+  "price": {
+    "platform": "deploio",
+    "tier": "mini",
+    "ram_gb": 0.625,
+    "vcpu": "1",
+    "chf_month": 17.5,
+    "usd_month": 21.62,
+    "usd_month_total": 105.89
+  },
+  "db": {
+    "plan": "nine-db-xs",
+    "usd_month": 84.27
+  },
+  "info": {
+    "workers": "1",
+    "threads": "5",
+    "total_mem_mb": "640",
+    "cpu_count": "1",
+    "worker_rss_mb_setting": "300",
+    "target_fraction": "0.8",
+    "worker_rss_mb": 117.0,
+    "ruby": "3.4.10",
+    "rails": "8.1.3",
+    "region": null,
+    "db_host": "managedvirtualmachine-9766935.mesh.nineapis.ch",
+    "pid": 22
+  },
+  "env": {
+    "worker_rss_mb": "300",
+    "target_fraction": "0.8"
+  },
+  "load": {
+    "rates": [
+      2,
+      5,
+      10,
+      15,
+      25,
+      50,
+      75,
+      100,
+      150
+    ],
+    "duration": 15,
+    "cooldown": 5,
+    "driven_from": "alessandro's laptop (home broadband) — same generator as the heroku run"
+  },
+  "scenarios": {
+    "cpu": {
+      "p95_ms": 223.111,
+      "server_p95_ms": 209.49649999999997,
+      "queue_and_network_p95_ms": 13.615,
+      "rps": 2.043823532320432,
+      "ok_rate": 1,
+      "target_rps": 2,
+      "met_slo": false,
+      "rps_eff": 0.0,
+      "rps_per_usd": 0.0,
+      "rps_per_usd_total": 0.0,
+      "ladder": [
+        {
+          "p95_ms": 223.111,
+          "server_p95_ms": 209.49649999999997,
+          "queue_and_network_p95_ms": 13.615,
+          "rps": 2.043823532320432,
+          "ok_rate": 1,
+          "target_rps": 2,
+          "met_slo": false,
+          "rps_eff": 0.0,
+          "rps_per_usd": 0.0,
+          "rps_per_usd_total": 0.0
+        }
+      ]
+    },
+    "io": {
+      "p95_ms": 75.86949999999999,
+      "server_p95_ms": 50.208,
+      "queue_and_network_p95_ms": 25.661,
+      "rps": 15.001258180746975,
+      "ok_rate": 1,
+      "target_rps": 15,
+      "met_slo": true,
+      "rps_eff": 15.001258180746975,
+      "rps_per_usd": 0.6938602303768258,
+      "rps_per_usd_total": 0.14166831788409645,
+      "ladder": [
+        {
+          "p95_ms": 67.0444,
+          "server_p95_ms": 50.19845,
+          "queue_and_network_p95_ms": 16.846,
+          "rps": 1.9999077375897059,
+          "ok_rate": 1,
+          "target_rps": 2,
+          "met_slo": true,
+          "rps_eff": 1.9999077375897059,
+          "rps_per_usd": 0.09250267056381618,
+          "rps_per_usd_total": 0.018886653485595484
+        },
+        {
+          "p95_ms": 74.9845,
+          "server_p95_ms": 50.2335,
+          "queue_and_network_p95_ms": 24.751,
+          "rps": 5.044754606873226,
+          "ok_rate": 1,
+          "target_rps": 5,
+          "met_slo": true,
+          "rps_eff": 5.044754606873226,
+          "rps_per_usd": 0.23333740087295216,
+          "rps_per_usd_total": 0.04764146384808032
+        },
+        {
+          "p95_ms": 86.29699999999998,
+          "server_p95_ms": 50.202,
+          "queue_and_network_p95_ms": 36.095,
+          "rps": 10.008407725297708,
+          "ok_rate": 1,
+          "target_rps": 10,
+          "met_slo": true,
+          "rps_eff": 10.008407725297708,
+          "rps_per_usd": 0.4629235765632612,
+          "rps_per_usd_total": 0.0945170245093749
+        },
+        {
+          "p95_ms": 75.86949999999999,
+          "server_p95_ms": 50.208,
+          "queue_and_network_p95_ms": 25.661,
+          "rps": 15.001258180746975,
+          "ok_rate": 1,
+          "target_rps": 15,
+          "met_slo": true,
+          "rps_eff": 15.001258180746975,
+          "rps_per_usd": 0.6938602303768258,
+          "rps_per_usd_total": 0.14166831788409645
+        },
+        {
+          "p95_ms": 219.92774999999997,
+          "server_p95_ms": 50.20925,
+          "queue_and_network_p95_ms": 169.718,
+          "rps": 24.95594711171085,
+          "ok_rate": 1,
+          "target_rps": 25,
+          "met_slo": false,
+          "rps_eff": 0.0,
+          "rps_per_usd": 0.0,
+          "rps_per_usd_total": 0.0
+        }
+      ]
+    },
+    "db_read": {
+      "p95_ms": 33.70599999999998,
+      "server_p95_ms": 2.0965,
+      "queue_and_network_p95_ms": 31.609,
+      "rps": 50.00841020267456,
+      "ok_rate": 1,
+      "target_rps": 50,
+      "met_slo": true,
+      "rps_eff": 50.00841020267456,
+      "rps_per_usd": 2.313062451557565,
+      "rps_per_usd_total": 0.472267543702659,
+      "ladder": [
+        {
+          "p95_ms": 33.3,
+          "server_p95_ms": 2.965,
+          "queue_and_network_p95_ms": 30.335,
+          "rps": 2.060278977724131,
+          "ok_rate": 1,
+          "target_rps": 2,
+          "met_slo": true,
+          "rps_eff": 2.060278977724131,
+          "rps_per_usd": 0.09529504984847968,
+          "rps_per_usd_total": 0.019456785132912748
+        },
+        {
+          "p95_ms": 60.05349999999999,
+          "server_p95_ms": 2.323,
+          "queue_and_network_p95_ms": 57.73,
+          "rps": 5.060553518016903,
+          "ok_rate": 1,
+          "target_rps": 5,
+          "met_slo": true,
+          "rps_eff": 5.060553518016903,
+          "rps_per_usd": 0.23406815531993075,
+          "rps_per_usd_total": 0.04779066501101995
+        },
+        {
+          "p95_ms": 171.7638499999991,
+          "server_p95_ms": 2.4482999999999993,
+          "queue_and_network_p95_ms": 169.316,
+          "rps": 9.999390703793116,
+          "ok_rate": 1,
+          "target_rps": 10,
+          "met_slo": true,
+          "rps_eff": 9.999390703793116,
+          "rps_per_usd": 0.4625065080385345,
+          "rps_per_usd_total": 0.09443186990077548
+        },
+        {
+          "p95_ms": 40.82524999999998,
+          "server_p95_ms": 2.3317499999999987,
+          "queue_and_network_p95_ms": 38.493,
+          "rps": 15.047943012773974,
+          "ok_rate": 1,
+          "target_rps": 15,
+          "met_slo": true,
+          "rps_eff": 15.047943012773974,
+          "rps_per_usd": 0.6960195658082319,
+          "rps_per_usd_total": 0.14210919834520705
+        },
+        {
+          "p95_ms": 28.15224999999999,
+          "server_p95_ms": 2.1839999999999997,
+          "queue_and_network_p95_ms": 25.968,
+          "rps": 25.03489738188905,
+          "ok_rate": 1,
+          "target_rps": 25,
+          "met_slo": true,
+          "rps_eff": 25.03489738188905,
+          "rps_per_usd": 1.1579508502261355,
+          "rps_per_usd_total": 0.23642362245621917
+        },
+        {
+          "p95_ms": 33.70599999999998,
+          "server_p95_ms": 2.0965,
+          "queue_and_network_p95_ms": 31.609,
+          "rps": 50.00841020267456,
+          "ok_rate": 1,
+          "target_rps": 50,
+          "met_slo": true,
+          "rps_eff": 50.00841020267456,
+          "rps_per_usd": 2.313062451557565,
+          "rps_per_usd_total": 0.472267543702659
+        },
+        {
+          "p95_ms": 2402.5195,
+          "server_p95_ms": 2.53725,
+          "queue_and_network_p95_ms": 2399.982,
+          "rps": 70.28128429996626,
+          "ok_rate": 1,
+          "target_rps": 75,
+          "met_slo": false,
+          "rps_eff": 0.0,
+          "rps_per_usd": 0.0,
+          "rps_per_usd_total": 0.0
+        }
+      ]
+    },
+    "db_write": {
+      "p95_ms": 29.344749999999983,
+      "server_p95_ms": 7.867999999999996,
+      "queue_and_network_p95_ms": 21.477,
+      "rps": 25.02908132953681,
+      "ok_rate": 1,
+      "target_rps": 25,
+      "met_slo": true,
+      "rps_eff": 25.02908132953681,
+      "rps_per_usd": 1.1576818376288998,
+      "rps_per_usd_total": 0.23636869703972813,
+      "ladder": [
+        {
+          "p95_ms": 29.624999999999993,
+          "server_p95_ms": 9.024499999999998,
+          "queue_and_network_p95_ms": 20.6,
+          "rps": 2.060075934398942,
+          "ok_rate": 1,
+          "target_rps": 2,
+          "met_slo": true,
+          "rps_eff": 2.060075934398942,
+          "rps_per_usd": 0.09528565839033035,
+          "rps_per_usd_total": 0.019454867639993788
+        },
+        {
+          "p95_ms": 37.84589999999998,
+          "server_p95_ms": 11.875499999999994,
+          "queue_and_network_p95_ms": 25.97,
+          "rps": 4.999542708493596,
+          "ok_rate": 1,
+          "target_rps": 5,
+          "met_slo": true,
+          "rps_eff": 4.999542708493596,
+          "rps_per_usd": 0.23124619373235875,
+          "rps_per_usd_total": 0.04721449342235901
+        },
+        {
+          "p95_ms": 55.469649999999994,
+          "server_p95_ms": 10.190649999999994,
+          "queue_and_network_p95_ms": 45.279,
+          "rps": 9.999651345489754,
+          "ok_rate": 1,
+          "target_rps": 10,
+          "met_slo": true,
+          "rps_eff": 9.999651345489754,
+          "rps_per_usd": 0.4625185636211727,
+          "rps_per_usd_total": 0.09443433133902875
+        },
+        {
+          "p95_ms": 32.7134,
+          "server_p95_ms": 9.0196,
+          "queue_and_network_p95_ms": 23.694,
+          "rps": 14.998504149186187,
+          "ok_rate": 1,
+          "target_rps": 15,
+          "met_slo": true,
+          "rps_eff": 14.998504149186187,
+          "rps_per_usd": 0.6937328468633759,
+          "rps_per_usd_total": 0.14164230946440823
+        },
+        {
+          "p95_ms": 29.344749999999983,
+          "server_p95_ms": 7.867999999999996,
+          "queue_and_network_p95_ms": 21.477,
+          "rps": 25.02908132953681,
+          "ok_rate": 1,
+          "target_rps": 25,
+          "met_slo": true,
+          "rps_eff": 25.02908132953681,
+          "rps_per_usd": 1.1576818376288998,
+          "rps_per_usd_total": 0.23636869703972813
+        },
+        {
+          "p95_ms": 2378.8215,
+          "server_p95_ms": 13.5,
+          "queue_and_network_p95_ms": 2365.322,
+          "rps": 45.99522176403251,
+          "ok_rate": 1,
+          "target_rps": 50,
+          "met_slo": false,
+          "rps_eff": 0.0,
+          "rps_per_usd": 0.0,
+          "rps_per_usd_total": 0.0
+        }
+      ]
+    },
+    "mixed": {
+      "p95_ms": 175.76099999999997,
+      "server_p95_ms": 132.5925,
+      "queue_and_network_p95_ms": 43.168,
+      "rps": 5.0221665877768,
+      "ok_rate": 1,
+      "target_rps": 5,
+      "met_slo": true,
+      "rps_eff": 5.0221665877768,
+      "rps_per_usd": 0.23229262663167435,
+      "rps_per_usd_total": 0.047428147962761354,
+      "ladder": [
+        {
+          "p95_ms": 120.6335,
+          "server_p95_ms": 105.7885,
+          "queue_and_network_p95_ms": 14.845,
+          "rps": 2.051961218197745,
+          "ok_rate": 1,
+          "target_rps": 2,
+          "met_slo": true,
+          "rps_eff": 2.051961218197745,
+          "rps_per_usd": 0.0949103246159919,
+          "rps_per_usd_total": 0.019378234188287328
+        },
+        {
+          "p95_ms": 175.76099999999997,
+          "server_p95_ms": 132.5925,
+          "queue_and_network_p95_ms": 43.168,
+          "rps": 5.0221665877768,
+          "ok_rate": 1,
+          "target_rps": 5,
+          "met_slo": true,
+          "rps_eff": 5.0221665877768,
+          "rps_per_usd": 0.23229262663167435,
+          "rps_per_usd_total": 0.047428147962761354
+        },
+        {
+          "p95_ms": 201.59449999999995,
+          "server_p95_ms": 158.65699999999998,
+          "queue_and_network_p95_ms": 42.937,
+          "rps": 9.955101175143655,
+          "ok_rate": 1,
+          "target_rps": 10,
+          "met_slo": false,
+          "rps_eff": 0.0,
+          "rps_per_usd": 0.0,
+          "rps_per_usd_total": 0.0
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Deploio mini: 640 MB / 1 vCPU (real cgroup limit), 1 Puma worker x 5 threads. Same commit (0f70507) and same Dockerfile as the heroku run.",
+    "TALLER LADDER than the heroku run (up to 150 RPS): deploio's db_read held at every rate up to 50, so its ceiling had not been found. This does not bias the comparison, because heroku already BROKE at 50 RPS, so rates above 50 cannot change its knee.",
+    "NETWORK IS NOT NEUTRAL and favours deploio: measured from this laptop, RTT is ~19ms to deploio (Zurich) vs ~36ms to heroku (Dublin). That ~17ms is spent inside the 200ms wall-clock SLO. It does not explain the knees (which fail with multi-second queues), but it does flatter deploio on marginal scenarios like mixed.",
+    "Database is nine-db-xs, a DEDICATED Postgres VM at 68.20 CHF (~$84.27/mo) vs Heroku's shared-tenancy essential-0 at $5/mo. That is a provisioning choice, not a platform property, and it dominates the total-cost column. Read RPS/$ (compute) for the platform comparison.",
+    "Prices converted from CHF at 1.235654 (2026-07-13)."
+  ]
+}

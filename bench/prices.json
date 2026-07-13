@@ -1,5 +1,6 @@
 {
   "_note": "Monthly USD list prices, verify before publishing (see README sources). RAM in GB. vCPU is the platform's advertised share, which is exactly what this benchmark exists to sanity-check against real throughput. Fly is pay-as-you-go; monthly = ~730h always-on.",
+  "_fx": "Deploio lists in CHF, not USD. Converted at CHF->USD 1.235654 (open.er-api.com, 2026-07-13); chf_month is the untouched list price from Nine's own calculator API (calculator-api-production.2deb129.deploio.app/product). Re-convert before publishing — an FX move silently reprices the whole platform.",
   "tiers": [
     { "platform": "heroku", "tier": "Basic",        "ram_gb": 0.5, "vcpu": "shared",  "usd_month": 7 },
     { "platform": "heroku", "tier": "Standard-1X",  "ram_gb": 0.5, "vcpu": "1x",      "usd_month": 25 },
@@ -15,6 +16,14 @@
     { "platform": "fly",    "tier": "shared-1x-1gb", "ram_gb": 1.0, "vcpu": "1 shared","usd_month": 5.70 },
     { "platform": "fly",    "tier": "shared-1x-2gb", "ram_gb": 2.0, "vcpu": "1 shared","usd_month": 10.70 },
     { "platform": "fly",    "tier": "shared-4x-8gb", "ram_gb": 8.0, "vcpu": "4 shared","usd_month": 42.79 },
-    { "platform": "fly",    "tier": "performance-1x","ram_gb": 2.0, "vcpu": "1 dedicated","usd_month": 31.00 }
-  ]
+    { "platform": "fly",    "tier": "performance-1x","ram_gb": 2.0, "vcpu": "1 dedicated","usd_month": 31.00 },
+
+    { "platform": "deploio", "tier": "micro",      "ram_gb": null,  "vcpu": null, "chf_month": 8.75,  "usd_month": 10.81 },
+    { "platform": "deploio", "tier": "mini",       "ram_gb": 0.625, "vcpu": "1",  "chf_month": 17.50, "usd_month": 21.62 },
+    { "platform": "deploio", "tier": "standard-1", "ram_gb": null,  "vcpu": null, "chf_month": 35.00, "usd_month": 43.25 },
+    { "platform": "deploio", "tier": "standard-2", "ram_gb": null,  "vcpu": null, "chf_month": 63.50, "usd_month": 78.46 },
+    { "platform": "deploio", "tier": "standard-4", "ram_gb": null,  "vcpu": null, "chf_month": 127.00,"usd_month": 156.93 }
+  ],
+  "_deploio_ram_note": "Only `mini` has verified RAM/vCPU (640 MB / 1 vCPU, read from the running container's cgroup via /bench/info). The other sizes carry prices from Nine's calculator API but unverified specs — measure before quoting them.",
+  "_databases": "Priced separately; DB plans are not comparable in kind across platforms. heroku essential-0 = $5/mo (shared tenancy). deploio nine-db-xs = 68.20 CHF (~$84.27/mo) — a DEDICATED Postgres VM, ~17x the Heroku DB cost, which dominates deploio's total-cost column and is the main reason RPS/$ and RPS/$-total disagree."
 }
