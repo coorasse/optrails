@@ -76,6 +76,14 @@ RSpec.describe BenchController do
       expect(json["slept_ms"]).to eq(10)
     end
 
+    # Without this the load side cannot separate app time from queue time, and
+    # the IO dimension reports an app time of zero at every rate.
+    it "reports server time so the load side can subtract queueing" do
+      get "/bench/io", params: { ms: 10 }
+
+      expect(json["server_ms"]).to be >= 10
+    end
+
     it "clamps the sleep to the upper bound" do
       get "/bench/io", params: { ms: 10_000 }
 
@@ -123,6 +131,7 @@ RSpec.describe BenchController do
       expect(json["select1_ms"]).to be >= 0
       expect(json["pk_read_ms"]).to be >= 0
       expect(json["insert_commit_ms"]).to be >= 0
+      expect(json["server_ms"]).to be >= 0
     end
   end
 

@@ -49,8 +49,10 @@ class BenchController < ApplicationController
   # concurrent requests the worker/thread config can overlap.
   def io
     ms = clamp(params[:ms].to_i, 1, 2000, default: 50)
-    sleep(ms / 1000.0)
-    render json: { slept_ms: ms }
+    actual = Benchmark.realtime { sleep(ms / 1000.0) } * 1000
+    # Without server_ms the load side cannot tell app time from queue time, and
+    # this is the one workload where that distinction is the whole point.
+    render json: { slept_ms: ms, server_ms: actual.round(3) }
   end
 
   # DB read: indexed single-row lookup by primary key over the seeded table.
@@ -98,6 +100,7 @@ class BenchController < ApplicationController
       select1_ms: select1_ms.round(3),
       pk_read_ms: pk_ms.round(3),
       insert_commit_ms: insert_ms.round(3),
+      server_ms: (checkout_ms + select1_ms + pk_ms + insert_ms).round(3),
       region: region, db_host: db_host
     }
   end

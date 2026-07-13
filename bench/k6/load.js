@@ -31,6 +31,15 @@ const SLO_MS = parseInt(__ENV.SLO_MS || '200');
 const WORK = __ENV.WORK || '20';
 const IO_MS = __ENV.IO_MS || '50';
 
+// Fixed-rate mode: hold RPS steady for DURATION seconds instead of ramping.
+//
+// A ramped run reports ONE p95 across every stage, so a single overloaded stage
+// poisons the whole summary and the run scores zero sustained RPS even though
+// lower rates held fine. To find the knee you must hold each rate steady and ask
+// whether THAT rate met the SLO. bench/collect.rb walks a ladder of these.
+const RPS = __ENV.RPS ? parseInt(__ENV.RPS) : null;
+const DURATION = parseInt(__ENV.DURATION || '20');
+
 const serverMs = new Trend('server_ms', true);
 const okRate = new Rate('endpoint_ok');
 
@@ -46,18 +55,29 @@ function stages() {
   return s;
 }
 
+const steady = {
+  executor: 'constant-arrival-rate',
+  rate: RPS,
+  timeUnit: '1s',
+  duration: `${DURATION}s`,
+  // Enough VUs that a slow server cannot starve the arrival rate: if every
+  // request took the full SLO, we would still need RPS * (SLO/1000) in flight.
+  preAllocatedVUs: Math.max(50, RPS * 4),
+  maxVUs: 2000,
+};
+
+const ramp = {
+  executor: 'ramping-arrival-rate',
+  startRate: START_RPS,
+  timeUnit: '1s',
+  preAllocatedVUs: 50,
+  maxVUs: 2000,
+  stages: stages(),
+};
+
 export const options = {
   discardResponseBodies: false,
-  scenarios: {
-    ramp: {
-      executor: 'ramping-arrival-rate',
-      startRate: START_RPS,
-      timeUnit: '1s',
-      preAllocatedVUs: 50,
-      maxVUs: 2000,
-      stages: stages(),
-    },
-  },
+  scenarios: RPS ? { steady } : { ramp },
   thresholds: {
     // Recorded, not aborted — we WANT to see where it breaks.
     http_req_duration: [{ threshold: `p(95)<${SLO_MS}`, abortOnFail: false }],

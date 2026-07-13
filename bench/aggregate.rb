@@ -98,8 +98,8 @@ module Aggregate
       rows.sort_by! { |_r, s| -(s["rps_per_usd"] || 0) }
 
       out << "\n### `#{scenario}` — SLO p95 < #{rows.first[0]['slo_ms']} ms\n\n"
-      out << "| platform | tier | RAM | $/mo | +db $/mo | workers x threads | p95 ms | RPS | " \
-             "SLO held | RPS/$ | RPS/$ total |\n"
+      out << "| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | " \
+             "p95 ms | SLO held | RPS/$ | RPS/$ total |\n"
       out << "|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|\n"
       rows.each { |r, s| out << scenario_row(r, s) }
     end
@@ -112,11 +112,17 @@ module Aggregate
     plan  = "#{info['workers'] || '?'} x #{info['threads'] || '?'}"
     ram   = price["ram_gb"] ? "#{price['ram_gb']} GB" : "—"
 
+    held = s["met_slo"]
+    # The sustained figure is the achieved rate at the knee, not the rate we
+    # asked for — a struggling box accepts fewer requests than it is offered.
+    sustained = held ? num(s["rps"], 1) : "0"
+    sustained += " (>=)" if s["knee_not_found"]
+
     format("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n",
            rec["platform"], rec["tier"], ram,
            usd(price["usd_month"]), usd(price["usd_month_total"]), plan,
-           num(s["p95_ms"], 1), num(s["rps"], 1),
-           s["met_slo"] ? "yes" : "**no**",
+           sustained, num(s["p95_ms"], 1),
+           held ? "yes" : "**no**",
            num(s["rps_per_usd"], 2), num(s["rps_per_usd_total"], 2))
   end
 
@@ -143,14 +149,42 @@ module Aggregate
              "#{' (placeholder — not measured)' if r.dig('env', 'worker_rss_mb').to_s == '300'}\n"
       out << "- **Commit**: `#{r['git_sha']}`\n" if r["git_sha"]
       if (load = r["load"])
-        out << "- **Load**: #{load['start_rps']}→#{load['max_rps']} RPS over " \
-               "#{load['stage_sec']}s stages, driven from #{load['driven_from'] || 'unspecified'}\n"
+        out << "- **Load**: fixed rates #{Array(load['rates']).join(', ')} RPS, " \
+               "#{load['duration']}s each, driven from #{load['driven_from'] || 'unspecified'}\n"
       else
         out << "- **Load**: none — topology only\n"
       end
       Array(r["notes"]).each { |n| out << "- **Note**: #{n}\n" }
+      out << ladder(r)
     end
     out
+  end
+
+  # The rate-by-rate curve behind each headline number. Without it "31 RPS" is
+  # unfalsifiable: you cannot tell a box that degraded gracefully from one that
+  # fell off a cliff one step later.
+  def ladder(rec)
+    steps = (rec["scenarios"] || {}).reject { |_k, v| Array(v["ladder"]).empty? }
+    return "" if steps.empty?
+
+    out = +"\n<details><summary>Rate ladder — p95 at each fixed rate, " \
+           "as wall time (app time + queue/network)</summary>\n\n"
+    steps.each do |scenario, s|
+      curve = s["ladder"].map do |step|
+        mark = step["met_slo"] ? "ok" : "**BROKE**"
+        wall = format("%.0f", step["p95_ms"] || 0)
+        split = if step["server_p95_ms"]
+                  format(" (app %.0f + wait %.0f)", step["server_p95_ms"],
+                         step["queue_and_network_p95_ms"] || 0)
+                else
+                  ""
+                end
+        "#{step['target_rps']} RPS: #{wall} ms#{split} #{mark}"
+      end
+      out << "- **#{scenario}**\n"
+      curve.each { |c| out << "  - #{c}\n" }
+    end
+    out << "\n</details>\n"
   end
 
   def num(value, places)

@@ -4,7 +4,7 @@
      Do not edit by hand: re-run `ruby bench/aggregate.rb`. -->
 
 1 run(s) across 1 platform(s): heroku.
-Last rendered 2026-07-12T21:47:45Z.
+Last rendered 2026-07-13T08:00:14Z.
 
 
 ## How to read this
@@ -29,20 +29,73 @@ per month**. Two rules make the numbers honest, and both bite:
 
 ## RPS per dollar
 
-No load runs recorded yet — every run so far is topology-only (`--no-load`). Install k6 and re-run `bench/collect.rb` to fill this in.
+### `cpu` — SLO p95 < 200 ms
+
+| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 124.5 | yes | 2.14 | 1.25 |
+
+### `io` — SLO p95 < 200 ms
+
+| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 92.2 | yes | 2.14 | 1.25 |
+
+### `db_read` — SLO p95 < 200 ms
+
+| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 126.9 | yes | 3.57 | 2.08 |
+
+### `mixed` — SLO p95 < 200 ms
+
+| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 91.8 | yes | 2.15 | 1.25 |
 
 
 ## Runs
 
-### heroku / Basic — 2026-07-12T21:47:45Z
+### heroku / Basic — 2026-07-13T08:00:14Z
 
 - **URL**: https://optrails-heroku-189a76ca2865.herokuapp.com
-- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 94.6 MB RSS/worker
+- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 126.9 MB RSS/worker
 - **Stack**: Ruby 3.4.10, Rails 8.1.3
 - **DB host**: `cfqhejne93eh4i.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com`
 - **Database**: essential-0 (~$5.00/mo)
 - **WORKER_RSS_MB**: 300 (placeholder — not measured)
-- **Commit**: `2209790`
-- **Load**: none — topology only
-- **Note**: Smoke-test tier. 512 MB gives exactly 1 Puma worker, so this is NOT comparable to the Fly 1GB / Render 2GB tiers.
-- **Note**: WORKER_RSS_MB is the 300 MB placeholder while a worker actually uses ~94 MB idle. Measure under load and set it identically on all platforms before a real run.
+- **Commit**: `cc04344`
+- **Load**: fixed rates 2, 5, 10, 15, 25, 50 RPS, 15s each, driven from alessandro's laptop (NOT neutral — smoke test only)
+- **Note**: SMOKE TEST, not publishable: driven from a laptop over home broadband, so round-trip network latency is inside every wall-clock p95. Read the app-time column, not the wall time.
+- **Note**: 512 MB Basic gives exactly 1 Puma worker, so this cannot show the memory-scaled-workers effect the harness exists to measure.
+- **Note**: No cooldown between rate steps: an overloaded step may leave a backlog that bleeds into the next.
+
+<details><summary>Rate ladder — p95 at each fixed rate, as wall time (app time + queue/network)</summary>
+
+- **cpu**
+  - 2 RPS: 110 ms (app 70 + wait 39) ok
+  - 5 RPS: 102 ms (app 63 + wait 39) ok
+  - 10 RPS: 100 ms (app 61 + wait 39) ok
+  - 15 RPS: 125 ms (app 63 + wait 62) ok
+  - 25 RPS: 13768 ms (app 62 + wait 13706) **BROKE**
+- **io**
+  - 2 RPS: 90 ms ok
+  - 5 RPS: 93 ms ok
+  - 10 RPS: 94 ms ok
+  - 15 RPS: 92 ms ok
+  - 25 RPS: 11137 ms **BROKE**
+- **db_read**
+  - 2 RPS: 43 ms (app 1 + wait 42) ok
+  - 5 RPS: 42 ms (app 1 + wait 41) ok
+  - 10 RPS: 43 ms (app 1 + wait 42) ok
+  - 15 RPS: 42 ms (app 1 + wait 41) ok
+  - 25 RPS: 127 ms (app 1 + wait 126) ok
+  - 50 RPS: 14211 ms (app 1 + wait 14210) **BROKE**
+- **mixed**
+  - 2 RPS: 112 ms (app 60 + wait 52) ok
+  - 5 RPS: 95 ms (app 59 + wait 35) ok
+  - 10 RPS: 91 ms (app 52 + wait 40) ok
+  - 15 RPS: 92 ms (app 53 + wait 39) ok
+  - 25 RPS: 3418 ms (app 65 + wait 3353) **BROKE**
+
+</details>

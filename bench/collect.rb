@@ -38,13 +38,16 @@ module Collect
 
   ALL_SCENARIOS = %w[cpu io db_read db_write db_latency mixed].freeze
 
+  # k6's exit code for "a threshold was crossed" — expected here, not fatal.
+  THRESHOLD_CROSSED = 99
+
   def options
     opts = {
       scenarios: %w[cpu io db_read db_write mixed],
       slo_ms: 200,
-      start_rps: 10,
-      max_rps: 500,
-      stage_sec: 30,
+      rates: [5, 10, 25, 50, 100, 200],
+      duration: 20,
+      cooldown: 5,
       load: true,
       notes: []
     }
@@ -56,9 +59,11 @@ module Collect
       o.on("--url URL", "base url of the deployed instance")              { |v| opts[:url] = v.chomp("/") }
       o.on("--scenarios LIST", "default: #{opts[:scenarios].join(',')}")  { |v| opts[:scenarios] = v.split(",") }
       o.on("--slo-ms MS", Integer, "p95 ceiling (default 200)")           { |v| opts[:slo_ms] = v }
-      o.on("--start-rps N", Integer)                                      { |v| opts[:start_rps] = v }
-      o.on("--max-rps N", Integer)                                        { |v| opts[:max_rps] = v }
-      o.on("--stage-sec N", Integer)                                      { |v| opts[:stage_sec] = v }
+      o.on("--rates LIST", "fixed rates to try, default #{opts[:rates].join(',')}") do |v|
+        opts[:rates] = v.split(",").map(&:to_i)
+      end
+      o.on("--duration N", Integer, "seconds to hold each rate (default 20)") { |v| opts[:duration] = v }
+      o.on("--cooldown N", Integer, "seconds to drain between rates (default 5)") { |v| opts[:cooldown] = v }
       o.on("--db PLAN:USD", "e.g. essential-0:5")                         { |v| opts[:db] = v }
       o.on("--usd-month N", Float, "override the price in prices.json")   { |v| opts[:usd_month] = v }
       o.on("--driven-from PLACE", "where the load generator ran")         { |v| opts[:driven_from] = v }
@@ -86,33 +91,92 @@ module Collect
 
   # The k6 summary reflects the whole ramp, so a run counts only if its p95 held
   # for the entire ramp. That is deliberately strict: see docs/BENCHMARKS.md.
-  def run_k6(opts, scenario)
+  # Hold `rate` steady for `duration` and report what happened at THAT rate.
+  def run_k6(opts, scenario, rate)
     abort "k6 not found on PATH — install it (brew install k6) or pass --no-load" unless k6?
 
     Dir.mktmpdir do |dir|
       summary = File.join(dir, "summary.json")
       env = {
-        "BASE_URL" => opts[:url], "SCENARIO" => scenario,
-        "START_RPS" => opts[:start_rps].to_s, "MAX_RPS" => opts[:max_rps].to_s,
-        "STAGE_SEC" => opts[:stage_sec].to_s, "SLO_MS" => opts[:slo_ms].to_s
+        "BASE_URL" => opts[:url], "SCENARIO" => scenario, "SLO_MS" => opts[:slo_ms].to_s,
+        "RPS" => rate.to_s, "DURATION" => opts[:duration].to_s
       }
-      warn "  k6: #{scenario} (#{opts[:start_rps]}->#{opts[:max_rps]} RPS)..."
       # load.js writes summary.json into the working directory.
       _out, err, status = Open3.capture3(env, "k6", "run", LOAD_SCRIPT, chdir: dir)
-      abort "k6 failed for #{scenario}:\n#{err}" unless status.success?
 
-      parse_summary(JSON.parse(File.read(summary)))
+      # Exit 99 means a threshold was crossed: this rate blew the SLO. That is a
+      # result, not a failure — it is exactly what we are here to find. Anything
+      # else (and a missing summary) is a real error.
+      ok = status.success? || status.exitstatus == THRESHOLD_CROSSED
+      abort "k6 failed for #{scenario} @ #{rate} RPS (exit #{status.exitstatus}):\n#{err}" unless ok
+      abort "k6 wrote no summary for #{scenario} @ #{rate} RPS" unless File.exist?(summary)
+
+      parse_summary(JSON.parse(File.read(summary))).merge("target_rps" => rate)
     end
+  end
+
+  # Walk the ladder and keep the highest rate that held the SLO. Stop climbing
+  # once a rate breaks: past the knee the box is only ever more overloaded, and
+  # every further step costs a run for a foregone conclusion.
+  def find_knee(opts, scenario, usd_compute, usd_total)
+    ladder = []
+    opts[:rates].sort.each_with_index do |rate, i|
+      # Let an overloaded box drain before the next measurement, or the previous
+      # step's backlog lands in this step's p95 and we measure our own wake.
+      sleep(opts[:cooldown]) if i.positive? && opts[:cooldown].to_i.positive?
+
+      step = score(run_k6(opts, scenario, rate), opts[:slo_ms], usd_compute, usd_total)
+      ladder << step
+      warn format("    %4d RPS -> wall p95 %8.1f ms | app %7.1f ms | waiting %8.1f ms  %s",
+                  rate, step["p95_ms"] || 0, step["server_p95_ms"] || 0,
+                  step["queue_and_network_p95_ms"] || 0,
+                  step["met_slo"] ? "ok" : "BROKE SLO")
+      break unless step["met_slo"]
+    end
+
+    knee = select_knee(ladder)
+    warn "    no rate held the SLO — lower --rates or raise --slo-ms" unless knee["met_slo"]
+    if knee["knee_not_found"]
+      warn "    SLO held at EVERY rate — the real knee is above #{ladder.last['target_rps']} RPS; " \
+           "raise --rates or this understates the platform"
+    end
+    knee
+  end
+
+  # Pure: pick the sustained result out of a ladder.
+  def select_knee(ladder)
+    return {} if ladder.empty?
+
+    held = ladder.select { |s| s["met_slo"] }
+    # Nothing held: report the gentlest rate tried, still scored as a failure, so
+    # the run records a real p95 rather than silently vanishing.
+    return ladder.first.merge("ladder" => ladder) if held.empty?
+
+    knee = held.max_by { |s| s["target_rps"] }
+    # If the top of the ladder still held, we never actually found the ceiling.
+    # Flag it: this is a lower bound, not the platform's limit.
+    knee = knee.merge("knee_not_found" => true) if held.size == ladder.size
+    knee.merge("ladder" => ladder)
   end
 
   def parse_summary(data)
     metrics = data["metrics"] || {}
     duration = metrics.dig("http_req_duration", "values") || {}
+    server = metrics.dig("server_ms", "values") || {}
+
+    p95 = duration["p(95)"] || duration["p95"]
+    server_p95 = server["p(95)"] || server["p95"]
+
     {
-      "p95_ms" => duration["p(95)"] || duration["p95"],
+      "p95_ms" => p95,
+      # What the app itself measured. The gap between the two is network plus
+      # time spent queueing before a thread ever picked the request up — which
+      # is the difference between "the app is slow" and "the box is full".
+      "server_p95_ms" => server_p95,
+      "queue_and_network_p95_ms" => (p95 && server_p95 ? (p95 - server_p95).round(3) : nil),
       "rps" => metrics.dig("http_reqs", "values", "rate"),
       "ok_rate" => metrics.dig("endpoint_ok", "values", "rate")
-    }
+    }.compact
   end
 
   # Mirrors crunch.py's rps_eff: RPS that broke the SLO is worth nothing.
@@ -184,7 +248,8 @@ module Collect
     scenarios = {}
     if opts[:load]
       opts[:scenarios].each do |scenario|
-        scenarios[scenario] = score(run_k6(opts, scenario), opts[:slo_ms], usd_compute, usd_total)
+        warn "  #{scenario}: climbing #{opts[:rates].join(', ')} RPS (#{opts[:duration]}s each)"
+        scenarios[scenario] = find_knee(opts, scenario, usd_compute, usd_total)
       end
     else
       warn "  --no-load: topology only, no k6"
@@ -204,7 +269,7 @@ module Collect
       # from, so record what the instance was actually configured with.
       "env" => { "worker_rss_mb" => info["worker_rss_mb_setting"],
                  "target_fraction" => info["target_fraction"] }.compact,
-      "load" => opts[:load] ? opts.slice(:start_rps, :max_rps, :stage_sec).transform_keys(&:to_s)
+      "load" => opts[:load] ? opts.slice(:rates, :duration, :cooldown).transform_keys(&:to_s)
                                   .merge("driven_from" => opts[:driven_from]) : nil,
       "scenarios" => scenarios,
       "notes" => opts[:notes]
