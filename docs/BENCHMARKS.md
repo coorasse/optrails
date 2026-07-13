@@ -4,7 +4,7 @@
      Do not edit by hand: re-run `ruby bench/aggregate.rb`. -->
 
 2 run(s) across 2 platform(s): deploio, heroku.
-Last rendered 2026-07-13T09:51:14Z.
+Last rendered 2026-07-13T12:32:19Z.
 
 
 ## How to read this
@@ -31,137 +31,139 @@ per month**. Two rules make the numbers honest, and both bite:
 
 ### `cpu` — SLO p95 < 200 ms
 
-| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
-|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 10.0 | 118.1 | yes | 1.43 | 0.83 |
-| deploio | mini | 0.625 GB | $21.62 | $105.89 | 1 x 5 | 0 | 223.1 | **no** | 0.00 | 0.00 |
+| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | essential-0 | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 126.9 | yes | 2.14 | 1.25 |
+| deploio | mini | postgresqlSingleDbS | 0.625 GB | $21.62 | $28.42 | 1 x 5 | 2.0 | 190.0 | yes | 0.09 | 0.07 |
 
 ### `io` — SLO p95 < 200 ms
 
-| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
-|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 90.8 | yes | 2.14 | 1.25 |
-| deploio | mini | 0.625 GB | $21.62 | $105.89 | 1 x 5 | 15.0 | 75.9 | yes | 0.69 | 0.14 |
+| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | essential-0 | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 95.7 | yes | 2.14 | 1.25 |
+| deploio | mini | postgresqlSingleDbS | 0.625 GB | $21.62 | $28.42 | 1 x 5 | 24.7 | 122.9 | yes | 1.14 | 0.87 |
 
 ### `db_read` — SLO p95 < 200 ms
 
-| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
-|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 92.2 | yes | 3.57 | 2.08 |
-| deploio | mini | 0.625 GB | $21.62 | $105.89 | 1 x 5 | 50.0 | 33.7 | yes | 2.31 | 0.47 |
+| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | essential-0 | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 84.2 | yes | 3.57 | 2.08 |
+| deploio | mini | postgresqlSingleDbS | 0.625 GB | $21.62 | $28.42 | 1 x 5 | 48.5 | 82.0 | yes | 2.24 | 1.71 |
 
 ### `db_write` — SLO p95 < 200 ms
 
-| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
-|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 87.7 | yes | 3.57 | 2.08 |
-| deploio | mini | 0.625 GB | $21.62 | $105.89 | 1 x 5 | 25.0 | 29.3 | yes | 1.16 | 0.24 |
+| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | essential-0 | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 24.6 | 183.7 | yes | 3.52 | 2.05 |
+| deploio | mini | postgresqlSingleDbS | 0.625 GB | $21.62 | $28.42 | 1 x 5 | 49.7 | 52.5 | yes | 2.30 | 1.75 |
 
 ### `mixed` — SLO p95 < 200 ms
 
-| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
-|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 91.6 | yes | 2.14 | 1.25 |
-| deploio | mini | 0.625 GB | $21.62 | $105.89 | 1 x 5 | 5.0 | 175.8 | yes | 0.23 | 0.05 |
+| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | essential-0 | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 97.6 | yes | 2.14 | 1.25 |
+| deploio | mini | postgresqlSingleDbS | 0.625 GB | $21.62 | $28.42 | 1 x 5 | 5.1 | 167.7 | yes | 0.23 | 0.18 |
 
 
 ## Runs
 
-### deploio / mini — 2026-07-13T09:51:14Z
-
-- **URL**: https://master.f1bb408.deploio.app
-- **Autotune**: 1 workers x 5 threads, 640 MB, 1 vCPU reported, 117.0 MB RSS/worker
-- **Stack**: Ruby 3.4.10, Rails 8.1.3
-- **DB host**: `managedvirtualmachine-9766935.mesh.nineapis.ch`
-- **Database**: nine-db-xs (~$84.27/mo)
-- **WORKER_RSS_MB**: 300 (placeholder — not measured)
-- **Commit**: `0f70507`
-- **Load**: fixed rates 2, 5, 10, 15, 25, 50, 75, 100, 150 RPS, 15s each, driven from alessandro's laptop (home broadband) — same generator as the heroku run
-- **Note**: Deploio mini: 640 MB / 1 vCPU (real cgroup limit), 1 Puma worker x 5 threads. Same commit (0f70507) and same Dockerfile as the heroku run.
-- **Note**: TALLER LADDER than the heroku run (up to 150 RPS): deploio's db_read held at every rate up to 50, so its ceiling had not been found. This does not bias the comparison, because heroku already BROKE at 50 RPS, so rates above 50 cannot change its knee.
-- **Note**: NETWORK IS NOT NEUTRAL and favours deploio: measured from this laptop, RTT is ~19ms to deploio (Zurich) vs ~36ms to heroku (Dublin). That ~17ms is spent inside the 200ms wall-clock SLO. It does not explain the knees (which fail with multi-second queues), but it does flatter deploio on marginal scenarios like mixed.
-- **Note**: Database is nine-db-xs, a DEDICATED Postgres VM at 68.20 CHF (~$84.27/mo) vs Heroku's shared-tenancy essential-0 at $5/mo. That is a provisioning choice, not a platform property, and it dominates the total-cost column. Read RPS/$ (compute) for the platform comparison.
-- **Note**: Prices converted from CHF at 1.235654 (2026-07-13).
-
-<details><summary>Rate ladder — p95 at each fixed rate, as wall time (app time + queue/network)</summary>
-
-- **cpu**
-  - 2 RPS: 223 ms (app 209 + wait 14) **BROKE**
-- **io**
-  - 2 RPS: 67 ms (app 50 + wait 17) ok
-  - 5 RPS: 75 ms (app 50 + wait 25) ok
-  - 10 RPS: 86 ms (app 50 + wait 36) ok
-  - 15 RPS: 76 ms (app 50 + wait 26) ok
-  - 25 RPS: 220 ms (app 50 + wait 170) **BROKE**
-- **db_read**
-  - 2 RPS: 33 ms (app 3 + wait 30) ok
-  - 5 RPS: 60 ms (app 2 + wait 58) ok
-  - 10 RPS: 172 ms (app 2 + wait 169) ok
-  - 15 RPS: 41 ms (app 2 + wait 38) ok
-  - 25 RPS: 28 ms (app 2 + wait 26) ok
-  - 50 RPS: 34 ms (app 2 + wait 32) ok
-  - 75 RPS: 2403 ms (app 3 + wait 2400) **BROKE**
-- **db_write**
-  - 2 RPS: 30 ms (app 9 + wait 21) ok
-  - 5 RPS: 38 ms (app 12 + wait 26) ok
-  - 10 RPS: 55 ms (app 10 + wait 45) ok
-  - 15 RPS: 33 ms (app 9 + wait 24) ok
-  - 25 RPS: 29 ms (app 8 + wait 21) ok
-  - 50 RPS: 2379 ms (app 14 + wait 2365) **BROKE**
-- **mixed**
-  - 2 RPS: 121 ms (app 106 + wait 15) ok
-  - 5 RPS: 176 ms (app 133 + wait 43) ok
-  - 10 RPS: 202 ms (app 159 + wait 43) **BROKE**
-
-</details>
-
-### heroku / Basic — 2026-07-13T08:48:13Z
+### heroku / Basic — 2026-07-13T12:19:33Z
 
 - **URL**: https://optrails-heroku-189a76ca2865.herokuapp.com
-- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 126.1 MB RSS/worker
+- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 128.0 MB RSS/worker
 - **Stack**: Ruby 3.4.10, Rails 8.1.3
 - **DB host**: `cfqhejne93eh4i.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com`
 - **Database**: essential-0 (~$5.00/mo)
 - **WORKER_RSS_MB**: 300 (placeholder — not measured)
-- **Commit**: `4665704`
-- **Load**: fixed rates 2, 5, 10, 15, 25, 50 RPS, 15s each, driven from alessandro's laptop (home broadband) — verified NOT the bottleneck: Heroku router reports connect=0ms
-- **Note**: 512 MB Basic gives exactly 1 Puma worker, so this cannot show the memory-scaled-workers effect the harness exists to measure. Not comparable to the Fly 1GB / Render 2GB tiers.
-- **Note**: The knee on EVERY scenario is the dyno's CPU share, not the workload and not the network. Verified from Heroku router logs during a 25 RPS io run: connect=0ms, router service p95=10224ms, while Rails logged 'Completed 200 OK in 50ms' for all 388 requests. The queueing is inside the dyno, ahead of Puma's threads.
-- **Note**: Model that fits all scenarios: capacity ~= 1 / (CPU-seconds per request), because MRI's GVL serialises Ruby in the single worker. io sleeps (releasing the GVL) yet still caps at ~25 RPS, which means the ~40ms of per-request Rails overhead alone is the ceiling. On this tier threads buy nothing; only more workers would.
-- **Note**: WORKER_RSS_MB is the 300 MB placeholder while a worker really uses ~94-126 MB. Measure under load and set identically on all platforms before a real run.
+- **Commit**: `70064fc`
+- **Load**: fixed rates 2, 5, 10, 15, 25, 50, 75, 100, 150 RPS, 15s each, driven from alessandro's laptop (home broadband)
+- **Note**: Heroku Basic (512 MB) + essential-0 ($5/mo, 1 GB, 20 connections, shared tenancy), eu region. 1 Puma worker x 5 threads.
+- **Note**: Same commit (0f70507), same image, same ladder, same retries as both deploio runs.
+- **Note**: NETWORK IS NOT NEUTRAL and penalises heroku: ~36ms RTT to Dublin vs ~19ms to Zurich from this laptop, spent inside the wall-clock SLO.
+- **Note**: Heroku exposes no cgroup CPU quota, so the autotuner reads 8 vCPUs from Etc.nprocessors while the dyno is really a shared slice; deploio reports a real limit of 1. Both land on 1 worker x 5 threads, so concurrency is comparable.
 
 <details><summary>Rate ladder — p95 at each fixed rate, as wall time (app time + queue/network)</summary>
 
 - **cpu**
-  - 2 RPS: 107 ms (app 69 + wait 38) ok
-  - 5 RPS: 116 ms (app 78 + wait 38) ok
-  - 10 RPS: 118 ms (app 76 + wait 42) ok
-  - 15 RPS: 201 ms (app 77 + wait 124) **BROKE**
+  - 2 RPS: 114 ms (app 76 + wait 39) ok
+  - 5 RPS: 110 ms (app 66 + wait 44) ok
+  - 10 RPS: 130 ms (app 90 + wait 40) ok
+  - 15 RPS: 127 ms (app 67 + wait 60) ok
+  - 25 RPS: 12478 ms (app 74 + wait 12404) **BROKE**
 - **io**
-  - 2 RPS: 92 ms (app 50 + wait 42) ok
+  - 2 RPS: 93 ms (app 50 + wait 43) ok
   - 5 RPS: 94 ms (app 50 + wait 44) ok
-  - 10 RPS: 92 ms (app 50 + wait 41) ok
-  - 15 RPS: 91 ms (app 50 + wait 41) ok
-  - 25 RPS: 10617 ms (app 50 + wait 10567) **BROKE**
+  - 10 RPS: 93 ms (app 50 + wait 42) ok
+  - 15 RPS: 96 ms (app 50 + wait 46) ok
+  - 25 RPS: 8705 ms (app 50 + wait 8655) **BROKE**
 - **db_read**
-  - 2 RPS: 47 ms (app 3 + wait 45) ok
-  - 5 RPS: 45 ms (app 1 + wait 44) ok
-  - 10 RPS: 44 ms (app 1 + wait 43) ok
-  - 15 RPS: 43 ms (app 1 + wait 42) ok
-  - 25 RPS: 92 ms (app 1 + wait 91) ok
-  - 50 RPS: 14306 ms (app 1 + wait 14305) **BROKE**
+  - 2 RPS: 49 ms (app 1 + wait 48) ok
+  - 5 RPS: 49 ms (app 1 + wait 48) ok
+  - 10 RPS: 46 ms (app 1 + wait 45) ok
+  - 15 RPS: 44 ms (app 1 + wait 43) ok
+  - 25 RPS: 84 ms (app 1 + wait 83) ok
+  - 50 RPS: 13194 ms (app 1 + wait 13193) **BROKE**
 - **db_write**
-  - 2 RPS: 47 ms (app 9 + wait 38) ok
-  - 5 RPS: 48 ms (app 5 + wait 43) ok
-  - 10 RPS: 46 ms (app 5 + wait 41) ok
-  - 15 RPS: 48 ms (app 7 + wait 41) ok
-  - 25 RPS: 88 ms (app 6 + wait 82) ok
-  - 50 RPS: 14326 ms (app 7 + wait 14319) **BROKE**
+  - 2 RPS: 46 ms (app 6 + wait 41) ok
+  - 5 RPS: 49 ms (app 6 + wait 43) ok
+  - 10 RPS: 47 ms (app 5 + wait 42) ok
+  - 15 RPS: 47 ms (app 5 + wait 42) ok
+  - 25 RPS: 184 ms (app 6 + wait 178) ok
+  - 50 RPS: 14358 ms (app 5 + wait 14353) **BROKE**
 - **mixed**
-  - 2 RPS: 91 ms (app 52 + wait 39) ok
-  - 5 RPS: 100 ms (app 61 + wait 38) ok
-  - 10 RPS: 92 ms (app 51 + wait 41) ok
-  - 15 RPS: 92 ms (app 51 + wait 41) ok
-  - 25 RPS: 7139 ms (app 86 + wait 7053) **BROKE**
+  - 2 RPS: 100 ms (app 60 + wait 39) ok
+  - 5 RPS: 100 ms (app 57 + wait 43) ok
+  - 10 RPS: 98 ms (app 60 + wait 39) ok
+  - 15 RPS: 98 ms (app 57 + wait 41) ok
+  - 25 RPS: 688 ms (app 54 + wait 634) **BROKE**
+
+</details>
+
+### deploio / mini — 2026-07-13T12:07:25Z
+
+- **URL**: https://master.f1bb408.deploio.app
+- **Autotune**: 1 workers x 5 threads, 640 MB, 1 vCPU reported, 116.4 MB RSS/worker
+- **Stack**: Ruby 3.4.10, Rails 8.1.3
+- **DB host**: `optrails-small.f1bb408.db.postgres.nineapis.ch`
+- **Database**: postgresqlSingleDbS (~$6.80/mo)
+- **WORKER_RSS_MB**: 300 (placeholder — not measured)
+- **Commit**: `70064fc`
+- **Load**: fixed rates 2, 5, 10, 15, 25, 50, 75, 100, 150 RPS, 15s each, driven from alessandro's laptop (home broadband)
+- **Note**: Cheap DB: postgresqlSingleDbS (5.50 CHF ~ $6.80/mo, 1 GB, 20 connections, shared cluster shared-cz42-01), co-located with the app in nine-cz42. This is the like-for-like match to Heroku essential-0 ($5/mo, 1 GB, 20 connections, shared tenancy), which makes the total-cost column meaningful.
+- **Note**: Same app, same commit (0f70507), same tier as the deploio/nine-db-xs run. The ONLY variable is the database plan.
+- **Note**: NETWORK IS NOT NEUTRAL and favours deploio: ~19ms RTT to Zurich vs ~36ms to Dublin from this laptop, spent inside the wall-clock SLO.
+
+<details><summary>Rate ladder — p95 at each fixed rate, as wall time (app time + queue/network)</summary>
+
+- **cpu**
+  - 2 RPS: 190 ms (app 153 + wait 37) ok
+  - 5 RPS: 212 ms (app 193 + wait 19) **BROKE**
+- **io**
+  - 2 RPS: 108 ms (app 51 + wait 58) ok
+  - 5 RPS: 87 ms (app 50 + wait 37) ok
+  - 10 RPS: 85 ms (app 50 + wait 35) ok
+  - 15 RPS: 79 ms (app 50 + wait 29) ok
+  - 25 RPS: 123 ms (app 50 + wait 73) ok
+  - 50 RPS: 8366 ms (app 50 + wait 8315) **BROKE**
+- **db_read**
+  - 2 RPS: 42 ms (app 1 + wait 41) ok
+  - 5 RPS: 26 ms (app 1 + wait 24) ok
+  - 10 RPS: 74 ms (app 3 + wait 71) ok
+  - 15 RPS: 68 ms (app 1 + wait 66) ok
+  - 25 RPS: 70 ms (app 2 + wait 68) ok
+  - 50 RPS: 82 ms (app 1 + wait 81) ok
+  - 75 RPS: 5968 ms (app 2 + wait 5966) **BROKE**
+- **db_write**
+  - 2 RPS: 47 ms (app 6 + wait 42) ok
+  - 5 RPS: 42 ms (app 5 + wait 37) ok
+  - 10 RPS: 29 ms (app 6 + wait 23) ok
+  - 15 RPS: 92 ms (app 6 + wait 85) ok
+  - 25 RPS: 63 ms (app 6 + wait 57) ok
+  - 50 RPS: 53 ms (app 6 + wait 46) ok
+  - 75 RPS: 12722 ms (app 10 + wait 12712) **BROKE**
+- **mixed**
+  - 2 RPS: 193 ms (app 177 + wait 16) ok
+  - 5 RPS: 168 ms (app 152 + wait 16) ok
+  - 10 RPS: 244 ms (app 192 + wait 52) **BROKE**
 
 </details>

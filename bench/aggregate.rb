@@ -98,9 +98,9 @@ module Aggregate
       rows.sort_by! { |_r, s| -(s["rps_per_usd"] || 0) }
 
       out << "\n### `#{scenario}` — SLO p95 < #{rows.first[0]['slo_ms']} ms\n\n"
-      out << "| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | " \
-             "p95 ms | SLO held | RPS/$ | RPS/$ total |\n"
-      out << "|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|\n"
+      out << "| platform | tier | database | RAM | $/mo | +db $/mo | workers x threads | " \
+             "sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |\n"
+      out << "|---|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|\n"
       rows.each { |r, s| out << scenario_row(r, s) }
     end
     out
@@ -118,8 +118,12 @@ module Aggregate
     sustained = held ? num(s["rps"], 1) : "0"
     sustained += " (>=)" if s["knee_not_found"]
 
-    format("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n",
-           rec["platform"], rec["tier"], ram,
+    # Two runs of the same tier can differ only by their database plan, so it has
+    # to be in the table or the rows are indistinguishable.
+    db = rec.dig("db", "plan") || "—"
+
+    format("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n",
+           rec["platform"], rec["tier"], db, ram,
            usd(price["usd_month"]), usd(price["usd_month_total"]), plan,
            sustained, num(s["p95_ms"], 1),
            held ? "yes" : "**no**",

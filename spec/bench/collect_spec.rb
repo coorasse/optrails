@@ -83,6 +83,56 @@ RSpec.describe Collect do
     end
   end
 
+  describe ".measure" do
+    # The ladder stops at the first failure, so an unlucky 15s window would end
+    # the climb for good. A break has to reproduce before we believe it.
+    def stub_k6(results)
+      queue = results.dup
+      allow(described_class).to receive(:run_k6) { queue.shift }
+    end
+
+    let(:opts) { { slo_ms: 200, retries: 1, cooldown: 0 } }
+
+    it "keeps a passing retry after a transient break" do
+      stub_k6([{ "p95_ms" => 900.0, "rps" => 10.0 },   # blip
+               { "p95_ms" => 80.0,  "rps" => 25.0 }])  # the truth
+
+      result = described_class.measure(opts, "io", 25, 10.0, 10.0)
+
+      expect(result["met_slo"]).to be true
+      expect(result["rps"]).to eq(25.0)
+      expect(result["attempts"]).to eq(2)
+    end
+
+    it "accepts a break that reproduces" do
+      stub_k6([{ "p95_ms" => 900.0, "rps" => 10.0 },
+               { "p95_ms" => 950.0, "rps" => 9.0 }])
+
+      result = described_class.measure(opts, "io", 25, 10.0, 10.0)
+
+      expect(result["met_slo"]).to be false
+      expect(result["attempts"]).to eq(2)
+    end
+
+    it "does not retry a rate that passed first time" do
+      stub_k6([{ "p95_ms" => 80.0, "rps" => 25.0 }])
+
+      result = described_class.measure(opts, "io", 25, 10.0, 10.0)
+
+      expect(result["met_slo"]).to be true
+      expect(result["attempts"]).to eq(1)
+    end
+
+    it "keeps the least-bad attempt when every retry breaks" do
+      stub_k6([{ "p95_ms" => 5000.0, "rps" => 1.0 },
+               { "p95_ms" => 900.0, "rps" => 9.0 }])
+
+      result = described_class.measure(opts, "io", 25, 10.0, 10.0)
+
+      expect(result["p95_ms"]).to eq(900.0)
+    end
+  end
+
   describe ".parse_summary" do
     it "reads p95, rate and success rate out of a k6 summary" do
       summary = {

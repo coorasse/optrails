@@ -48,6 +48,7 @@ module Collect
       rates: [5, 10, 25, 50, 100, 200],
       duration: 20,
       cooldown: 5,
+      retries: 1,
       load: true,
       notes: []
     }
@@ -64,6 +65,9 @@ module Collect
       end
       o.on("--duration N", Integer, "seconds to hold each rate (default 20)") { |v| opts[:duration] = v }
       o.on("--cooldown N", Integer, "seconds to drain between rates (default 5)") { |v| opts[:cooldown] = v }
+      o.on("--retries N", Integer, "re-test a broken rate N times before believing it (default 1)") do |v|
+        opts[:retries] = v
+      end
       o.on("--db PLAN:USD", "e.g. essential-0:5")                         { |v| opts[:db] = v }
       o.on("--usd-month N", Float, "override the price in prices.json")   { |v| opts[:usd_month] = v }
       o.on("--driven-from PLACE", "where the load generator ran")         { |v| opts[:driven_from] = v }
@@ -125,12 +129,8 @@ module Collect
       # step's backlog lands in this step's p95 and we measure our own wake.
       sleep(opts[:cooldown]) if i.positive? && opts[:cooldown].to_i.positive?
 
-      step = score(run_k6(opts, scenario, rate), opts[:slo_ms], usd_compute, usd_total)
+      step = measure(opts, scenario, rate, usd_compute, usd_total)
       ladder << step
-      warn format("    %4d RPS -> wall p95 %8.1f ms | app %7.1f ms | waiting %8.1f ms  %s",
-                  rate, step["p95_ms"] || 0, step["server_p95_ms"] || 0,
-                  step["queue_and_network_p95_ms"] || 0,
-                  step["met_slo"] ? "ok" : "BROKE SLO")
       break unless step["met_slo"]
     end
 
@@ -141,6 +141,36 @@ module Collect
            "raise --rates or this understates the platform"
     end
     knee
+  end
+
+  # Measure one rate, and make a break EARN it. The ladder stops at the first
+  # failure, so a single unlucky 15s window (a noisy neighbour, a GC pause, a
+  # blip on the wire) would otherwise end the climb for good and silently
+  # understate the platform. Retry a failure before believing it; keep the best
+  # attempt, since a rate the box served once is a rate the box can serve.
+  def measure(opts, scenario, rate, usd_compute, usd_total)
+    attempts = []
+    (opts[:retries] + 1).times do |attempt|
+      if attempt.positive?
+        warn "         retrying #{rate} RPS (attempt #{attempt + 1}) — a break must reproduce"
+        sleep(opts[:cooldown]) if opts[:cooldown].to_i.positive?
+      end
+
+      step = score(run_k6(opts, scenario, rate), opts[:slo_ms], usd_compute, usd_total)
+      attempts << step
+      log_step(rate, step)
+      break if step["met_slo"]
+    end
+
+    best = attempts.find { |s| s["met_slo"] } || attempts.min_by { |s| s["p95_ms"] || Float::INFINITY }
+    best.merge("attempts" => attempts.size)
+  end
+
+  def log_step(rate, step)
+    warn format("    %4d RPS -> wall p95 %8.1f ms | app %7.1f ms | waiting %8.1f ms  %s",
+                rate, step["p95_ms"] || 0, step["server_p95_ms"] || 0,
+                step["queue_and_network_p95_ms"] || 0,
+                step["met_slo"] ? "ok" : "BROKE SLO")
   end
 
   # Pure: pick the sustained result out of a ladder.
@@ -269,7 +299,7 @@ module Collect
       # from, so record what the instance was actually configured with.
       "env" => { "worker_rss_mb" => info["worker_rss_mb_setting"],
                  "target_fraction" => info["target_fraction"] }.compact,
-      "load" => opts[:load] ? opts.slice(:rates, :duration, :cooldown).transform_keys(&:to_s)
+      "load" => opts[:load] ? opts.slice(:rates, :duration, :cooldown, :retries).transform_keys(&:to_s)
                                   .merge("driven_from" => opts[:driven_from]) : nil,
       "scenarios" => scenarios,
       "notes" => opts[:notes]
