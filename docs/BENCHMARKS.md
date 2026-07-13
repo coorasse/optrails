@@ -4,7 +4,7 @@
      Do not edit by hand: re-run `ruby bench/aggregate.rb`. -->
 
 1 run(s) across 1 platform(s): heroku.
-Last rendered 2026-07-13T08:00:14Z.
+Last rendered 2026-07-13T08:48:13Z.
 
 
 ## How to read this
@@ -33,69 +33,82 @@ per month**. Two rules make the numbers honest, and both bite:
 
 | platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
 |---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 124.5 | yes | 2.14 | 1.25 |
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 10.0 | 118.1 | yes | 1.43 | 0.83 |
 
 ### `io` — SLO p95 < 200 ms
 
 | platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
 |---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 92.2 | yes | 2.14 | 1.25 |
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 90.8 | yes | 2.14 | 1.25 |
 
 ### `db_read` — SLO p95 < 200 ms
 
 | platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
 |---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 126.9 | yes | 3.57 | 2.08 |
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 92.2 | yes | 3.57 | 2.08 |
+
+### `db_write` — SLO p95 < 200 ms
+
+| platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
+|---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 25.0 | 87.7 | yes | 3.57 | 2.08 |
 
 ### `mixed` — SLO p95 < 200 ms
 
 | platform | tier | RAM | $/mo | +db $/mo | workers x threads | sustained RPS | p95 ms | SLO held | RPS/$ | RPS/$ total |
 |---|---|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
-| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 91.8 | yes | 2.15 | 1.25 |
+| heroku | Basic | 0.5 GB | $7.00 | $12.00 | 1 x 5 | 15.0 | 91.6 | yes | 2.14 | 1.25 |
 
 
 ## Runs
 
-### heroku / Basic — 2026-07-13T08:00:14Z
+### heroku / Basic — 2026-07-13T08:48:13Z
 
 - **URL**: https://optrails-heroku-189a76ca2865.herokuapp.com
-- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 126.9 MB RSS/worker
+- **Autotune**: 1 workers x 5 threads, 512 MB, 8 vCPU reported, 126.1 MB RSS/worker
 - **Stack**: Ruby 3.4.10, Rails 8.1.3
 - **DB host**: `cfqhejne93eh4i.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com`
 - **Database**: essential-0 (~$5.00/mo)
 - **WORKER_RSS_MB**: 300 (placeholder — not measured)
-- **Commit**: `cc04344`
-- **Load**: fixed rates 2, 5, 10, 15, 25, 50 RPS, 15s each, driven from alessandro's laptop (NOT neutral — smoke test only)
-- **Note**: SMOKE TEST, not publishable: driven from a laptop over home broadband, so round-trip network latency is inside every wall-clock p95. Read the app-time column, not the wall time.
-- **Note**: 512 MB Basic gives exactly 1 Puma worker, so this cannot show the memory-scaled-workers effect the harness exists to measure.
-- **Note**: No cooldown between rate steps: an overloaded step may leave a backlog that bleeds into the next.
+- **Commit**: `4665704`
+- **Load**: fixed rates 2, 5, 10, 15, 25, 50 RPS, 15s each, driven from alessandro's laptop (home broadband) — verified NOT the bottleneck: Heroku router reports connect=0ms
+- **Note**: 512 MB Basic gives exactly 1 Puma worker, so this cannot show the memory-scaled-workers effect the harness exists to measure. Not comparable to the Fly 1GB / Render 2GB tiers.
+- **Note**: The knee on EVERY scenario is the dyno's CPU share, not the workload and not the network. Verified from Heroku router logs during a 25 RPS io run: connect=0ms, router service p95=10224ms, while Rails logged 'Completed 200 OK in 50ms' for all 388 requests. The queueing is inside the dyno, ahead of Puma's threads.
+- **Note**: Model that fits all scenarios: capacity ~= 1 / (CPU-seconds per request), because MRI's GVL serialises Ruby in the single worker. io sleeps (releasing the GVL) yet still caps at ~25 RPS, which means the ~40ms of per-request Rails overhead alone is the ceiling. On this tier threads buy nothing; only more workers would.
+- **Note**: WORKER_RSS_MB is the 300 MB placeholder while a worker really uses ~94-126 MB. Measure under load and set identically on all platforms before a real run.
 
 <details><summary>Rate ladder — p95 at each fixed rate, as wall time (app time + queue/network)</summary>
 
 - **cpu**
-  - 2 RPS: 110 ms (app 70 + wait 39) ok
-  - 5 RPS: 102 ms (app 63 + wait 39) ok
-  - 10 RPS: 100 ms (app 61 + wait 39) ok
-  - 15 RPS: 125 ms (app 63 + wait 62) ok
-  - 25 RPS: 13768 ms (app 62 + wait 13706) **BROKE**
+  - 2 RPS: 107 ms (app 69 + wait 38) ok
+  - 5 RPS: 116 ms (app 78 + wait 38) ok
+  - 10 RPS: 118 ms (app 76 + wait 42) ok
+  - 15 RPS: 201 ms (app 77 + wait 124) **BROKE**
 - **io**
-  - 2 RPS: 90 ms ok
-  - 5 RPS: 93 ms ok
-  - 10 RPS: 94 ms ok
-  - 15 RPS: 92 ms ok
-  - 25 RPS: 11137 ms **BROKE**
+  - 2 RPS: 92 ms (app 50 + wait 42) ok
+  - 5 RPS: 94 ms (app 50 + wait 44) ok
+  - 10 RPS: 92 ms (app 50 + wait 41) ok
+  - 15 RPS: 91 ms (app 50 + wait 41) ok
+  - 25 RPS: 10617 ms (app 50 + wait 10567) **BROKE**
 - **db_read**
-  - 2 RPS: 43 ms (app 1 + wait 42) ok
-  - 5 RPS: 42 ms (app 1 + wait 41) ok
-  - 10 RPS: 43 ms (app 1 + wait 42) ok
-  - 15 RPS: 42 ms (app 1 + wait 41) ok
-  - 25 RPS: 127 ms (app 1 + wait 126) ok
-  - 50 RPS: 14211 ms (app 1 + wait 14210) **BROKE**
+  - 2 RPS: 47 ms (app 3 + wait 45) ok
+  - 5 RPS: 45 ms (app 1 + wait 44) ok
+  - 10 RPS: 44 ms (app 1 + wait 43) ok
+  - 15 RPS: 43 ms (app 1 + wait 42) ok
+  - 25 RPS: 92 ms (app 1 + wait 91) ok
+  - 50 RPS: 14306 ms (app 1 + wait 14305) **BROKE**
+- **db_write**
+  - 2 RPS: 47 ms (app 9 + wait 38) ok
+  - 5 RPS: 48 ms (app 5 + wait 43) ok
+  - 10 RPS: 46 ms (app 5 + wait 41) ok
+  - 15 RPS: 48 ms (app 7 + wait 41) ok
+  - 25 RPS: 88 ms (app 6 + wait 82) ok
+  - 50 RPS: 14326 ms (app 7 + wait 14319) **BROKE**
 - **mixed**
-  - 2 RPS: 112 ms (app 60 + wait 52) ok
-  - 5 RPS: 95 ms (app 59 + wait 35) ok
-  - 10 RPS: 91 ms (app 52 + wait 40) ok
-  - 15 RPS: 92 ms (app 53 + wait 39) ok
-  - 25 RPS: 3418 ms (app 65 + wait 3353) **BROKE**
+  - 2 RPS: 91 ms (app 52 + wait 39) ok
+  - 5 RPS: 100 ms (app 61 + wait 38) ok
+  - 10 RPS: 92 ms (app 51 + wait 41) ok
+  - 15 RPS: 92 ms (app 51 + wait 41) ok
+  - 25 RPS: 7139 ms (app 86 + wait 7053) **BROKE**
 
 </details>
